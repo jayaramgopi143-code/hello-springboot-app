@@ -1,0 +1,12 @@
+replicaCount: 1
+
+image:
+  repository: springboot-app
+  pullPolicy: IfNotPresent
+  tag: "v1"
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+  nodePort: 30081
