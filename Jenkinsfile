@@ -41,20 +41,33 @@ stages {
                '''
               }
           }
+
     stage('Commit GitOps Changes') {
-        steps {
-            sh '''
-               git config --global user.email "jayaramgopi143@gmail.com"
-               git config --global user.name "jayaramgopi143-code"
+    steps {
+        // Use your GitHub credentials block so Jenkins has push permissions
+        withCredentials([usernamePassword(
+            credentialsId: 'cfc270c2-7074-40fa-b35e-c3fb82c71021', // Your GitHub credential ID from the logs
+            usernameVariable: 'GIT_USER',
+            passwordVariable: 'GIT_TOKEN'
+        )]) {
+            sh """
+                git config --global user.email "jayaramgopi143@gmail.com"
+                git config --global user.name "jayaramgopi143-code"
+                
+                git add springboot-chart/values-dev.yaml
+                git commit -m "updated image tag to ${BUILD_NUMBER}"
+                
+                # Setup authentication URL including the token/password securely
+                git remote set-url origin https://\$GIT_USER:\$GIT_TOKEN@github.com/jayaramgopi143-code/hello-springboot-app.git
+                
+                # Push the current detached HEAD commit directly into the remote main branch
+                git push origin HEAD:main
+            """
+        }
+    }
+}
 
-               git add springboot-chart/values-dev.yaml
-               git commit -m "updated image tag to ${BUILD_NUMBER}"
 
-               git push origin main
-               '''
-              }
-
-          }
    }
 
 }
