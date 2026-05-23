@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: springboot-app
+  repository: jayaramgopi143/springboot-app
   pullPolicy: IfNotPresent
-  tag: "v1"
+  tag: "1"
 
 service:
   type: NodePort
