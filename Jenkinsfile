@@ -8,33 +8,58 @@ environment {
 
 stages {
 
-    stage('Git Checkout') {
-        steps {
-            git 'https://github.com/jayaramgopi143-code/hello-springboot-app.git'
-        }
-    }
-
     stage('Maven Build') {
         steps {
             sh 'mvn clean package'
         }
     }
 
-    stage('Docker Build') {
-        steps {
-            sh 'docker build -t springboot-app:v1 .'
+    stage('Build & Push Docker Image') {
+    steps {
+        script {
+            // Ensure this variable is defined globally or within the environment block if used in other stages
+            IMAGE_TAG = "${BUILD_NUMBER}"
         }
-    }
 
-    stage('Helm Deploy') {
-        steps {
-            sh '''
-            cd /var/jenkins_home/workspace/springboot-helm-pipeline/springboot-chart
+        // 1. Make sure 'dockerhub-creds' matches your exact Jenkins Credentials ID
+        withCredentials([usernamePassword(
+            credentialsId: 'dockerhub-creds',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS'
+        )]) {
+            // 2. Use double quotes for the sh block so Jenkins variables like ${IMAGE_TAG} expand properly
+            sh """
+                echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
 
-            helm upgrade --install springboot-dev . -f values-dev.yaml
-            '''
+                docker build -t \$DOCKER_USER/springboot-app:${IMAGE_TAG} .
+
+                docker push \$DOCKER_USER/springboot-app:${IMAGE_TAG}
+            """
         }
     }
 }
+
+    stage('Update Helm Values') {
+        steps {
+            sh '''
+               sed -i "s/tag:.*/tag: \"${BUILD_NUMBER}\"/" springboot-chart/values-dev.yaml
+               '''
+              }
+          }
+    stage('Commit GitOps Changes') {
+        steps {
+            sh '''
+               git config --global user.email "jayaramgopi143@gmail.com"
+               git config --global user.name "jayaramgopi143-code"
+
+               git add springboot-chart/values-dev.yaml
+               git commit -m "updated image tag to ${BUILD_NUMBER}"
+
+               git push origin main
+               '''
+              }
+
+          }
+   }
 
 }
