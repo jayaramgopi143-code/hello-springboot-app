@@ -1,10 +1,14 @@
 pipeline {
-
 agent any
+
+environment {
+    APP_NAME = "springboot-app"
+    IMAGE_TAG = "v1"
+}
 
 stages {
 
-    stage('Clone Code') {
+    stage('Git Checkout') {
         steps {
             git 'https://github.com/jayaramgopi143-code/hello-springboot-app.git'
         }
@@ -22,22 +26,13 @@ stages {
         }
     }
 
-    stage('Load Image into Minikube') {
+    stage('Helm Deploy') {
         steps {
-            sh 'minikube image load springboot-app:v1'
-        }
-    }
+            sh '''
+            cd /var/jenkins_home/workspace/springboot-helm-pipeline/springboot-chart
 
-    stage('Deploy to Kubernetes') {
-        steps {
-            sh 'kubectl apply -f k8s/'
-        }
-    }
-
-    stage('Verify Deployment') {
-        steps {
-            sh 'kubectl get pods'
-            sh 'kubectl get svc'
+            helm upgrade --install springboot-dev . -f values-dev.yaml
+            '''
         }
     }
 }

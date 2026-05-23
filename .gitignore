@@ -1,0 +1,19 @@
+# Build and target directories
+target/
+*.jar
+*.war
+
+# IDE specific files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Logs
+*.log
+
+# Temporary local Kubernetes / Minikube configs
+*clean-config.yaml
+*fixed-config.yaml
