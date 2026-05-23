@@ -3,8 +3,8 @@ replicaCount: 2
 image:
   repository: jayaramgopi143/springboot-app
   pullPolicy: IfNotPresent
-  tag: "7"
- 
+  tag: "10"
+
 resources:
   limits:
     cpu: "1"

@@ -9,18 +9,18 @@ service:
   type: NodePort
   port: 80
   targetPort: 8080
-  nodePort: 30081
+  nodePort: 30082
 
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tas>
 livenessProbe:
   httpGet:
-    path: /
+    path: /actuator/health
     port: 8080
   initialDelaySeconds: 30  # Gives Spring Boot 30 seconds to boot up before checking
   periodSeconds: 10
 readinessProbe:
   httpGet:
-    path: /
+    path: /actuator/health
     port: 8080
   initialDelaySeconds: 30  # Gives Spring Boot 30 seconds to boot up before checking
   periodSeconds: 10
