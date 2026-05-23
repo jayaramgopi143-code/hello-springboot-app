@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: springboot-app-prod  # A distinct name for Production
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/jayaramgopi143-code/hello-springboot-app.git
+    targetRevision: HEAD
+    path: springboot-chart
+    helm:
+      # THIS IS TRICK: You explicitly tell Helm to use the production overrides!
+      valueFiles:
+        - values.yaml
+        - values-prod.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod-env  # Usually deployed to a separate production namespace
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
