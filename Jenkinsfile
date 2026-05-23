@@ -15,24 +15,19 @@ stages {
     }
 
     stage('Build & Push Docker Image') {
+    environment {
+        // This declares the variable safely for this stage only
+        IMAGE_TAG = "${BUILD_NUMBER}"
+    }
     steps {
-        script {
-            // Ensure this variable is defined globally or within the environment block if used in other stages
-            IMAGE_TAG = "${BUILD_NUMBER}"
-        }
-
-        // 1. Make sure 'dockerhub-creds' matches your exact Jenkins Credentials ID
         withCredentials([usernamePassword(
-            credentialsId: 'dockerhub-creds',
+            credentialsId: 'dockerhub-creds', // Make sure this matches your exact Jenkins Credential ID
             usernameVariable: 'DOCKER_USER',
             passwordVariable: 'DOCKER_PASS'
         )]) {
-            // 2. Use double quotes for the sh block so Jenkins variables like ${IMAGE_TAG} expand properly
             sh """
                 echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
-
                 docker build -t \$DOCKER_USER/springboot-app:${IMAGE_TAG} .
-
                 docker push \$DOCKER_USER/springboot-app:${IMAGE_TAG}
             """
         }
